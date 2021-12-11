@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>
+    </head>
+
+    <body style="text-align: center;">
+
+        <form action="/create/<%= email %>" method="post">
+            <input type="number" name="roomid" ></body>
+            <br>
+            <input type="password" name="roompass" ></input>
+            <br>
+            <button type="submit">CreateRoom</button>
+        </form>
+
+        <form action="/join/<%= email %>" method="post">
+            <input type="number" name="roomid" ></body>
+            <br>
+            <input type="password" name="roompass" ></input>
+            <br>
+            <button type="submit">JoinRoom</button>
+        </form>
+
+        <p><%= message %></p>
+        
+        
+
+    </body>
+</html>

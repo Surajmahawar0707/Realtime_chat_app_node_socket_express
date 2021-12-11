@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <style>
+        .users{
+            overflow-y: scroll;
+            background-color: antiquewhite;
+        }
+
+        .chatbox{
+            overflow: scroll;
+        }
+
+        .functions{
+            background-color: antiquewhite;
+        }
+    </style>
+
+    <head>
+        <script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>
+        <script>
+            const socket = io("http://localhost:8080")
+            socket.on('connection')
+            var allusers = [];
+            
+            const runf = () => {  
+                var email = '<%= email %>';
+                var room = parseInt('<%= room %>');
+                console.log("{{{{{{{{{{{{{{{{{{{{")
+                console.log('<%= cau %>');
+                allusers = '<%= cau %>'.split(",");
+                if(allusers[0] === ""){
+                    allusers.pop("")
+                }
+                console.log(allusers);
+                console.log("ttttttttttttttttttt")
+                document.getElementById("users").innerHTML = 
+                '<p style="border-bottom: 3px solid grey;">Active Users</p>'+
+                    '<% if(cau.length > 0){ %>'+
+                        '<% for(var i=0; i<cau.length; i++){ %>'+
+                            '<% if(cau[i] !== email){ %>'+
+                                '<p><%= cau[i] %></p>'+
+                            '<% } %>'+
+                        '<% } %>'+
+                    '<% } %>'
+                document.getElementById("functions").innerHTML = 
+                '<% if(isAdmin){ %>'+
+                    '<div class="functions">'+
+                        '<form action="/abortroom/<%= email %>" method="post">'+
+                            '<input hidden type="number" value="<%= room %>" name="roomid"/>'+
+                            '<button style="margin: 10px 10px; padding: 15px 40px; border: 2px solid red; background-color:#b83b3b; color: white; border-radius: 50px" onclick="deleteroom()">Abort Room</button>'+
+                        '</form>'+
+                    '</div>'+
+                '<% }else{ %>'+
+                    '<div class="functions">'+
+                        '<form action="/leaveroom/<%= email %>" method="post">'+
+                            '<input hidden type="number" value="<%= room %>" name="roomid"/>'+
+                            '<button style="margin: 10px 10px; padding: 15px 40px; border: 2px solid red; background-color:#b83b3b; color: white; border-radius: 50px" onclick="leaveroom()">Exit Room</button>'+
+                        '</form>'+
+                    '</div>'+
+                '<% } %>'
+                document.getElementById("chatbox").innerHTML = "";
+                socket.emit('gotnewuser', {email: "<%= email %>", room: "<%= room %>"});
+                document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+            }
+            socket.on('newuser', (data) => {
+                if(data.room.toString() === '<%= room %>'){
+                    allusers.push(data.email)
+                    allusers.sort();
+                    var temp = [allusers[0]];
+                    for(let i=1; i<allusers.length; i++){
+                        if(allusers[i-1] !== allusers[i]){
+                            temp.push(allusers[i])
+                        }
+                    }
+                    allusers = temp;
+                    temp = [];
+                    console.log(allusers);
+                    document.getElementById("users").innerHTML += "<p>"+data.email+"</p>";
+                    document.getElementById("chatbox").innerHTML += 
+                    '<div style="width: 100%; height: fit-content; text-align:center; float:left; display: block">'+
+                        data.email+" has joined..."+
+                    '</div>'
+                    document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+                }
+            })
+
+            const leaveroom = () => {
+                socket.emit('leaveroom', {email: "<%= email %>", room: "<%= room %>"})
+            }            
+
+            socket.on("userleft", (data) => {
+                if(data.room === parseInt("<%= room %>")){
+                    console.log("$$$$$$$$$$$$$");
+                    console.log(allusers[0]);
+                    console.log(allusers.length);
+                    var newarr = [];
+                    for(let i=0; i<allusers.length; i++){
+                        if(allusers[i] !== data.email){
+                            newarr.push(allusers[i])
+                        }
+                    }
+                    allusers = newarr;
+                    console.log(data.email)
+                    console.log(allusers)
+                    document.getElementById("chatbox").innerHTML += "<p>"+data.email+" has left</p>";
+                    var u = "";
+                    for(let i=0; i<allusers.length; i++){
+                        u += '<p>' + allusers[i] + '</p>';
+                    }
+                    document.getElementById("users").innerHTML = '<p style="border-bottom: 3px solid grey;">Active Users</p>'+u;
+                    document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;   
+                }
+            })
+
+            var uhi = 0;
+
+            const sendmessage = () => {
+                if(document.getElementById("messageInput").value.trim().length > 0){
+                    var from = '<%= email %>';
+                    pre_email = "";
+                    uhi = 1;
+                    var time = new Date();
+                    var mm = time.getMinutes();
+                    var curr_time = time.getHours()+":";
+                    if(mm < 10){
+                        mm = "0"+mm.toString();
+                    }
+                    curr_time += mm.toString();
+                    var to = parseInt('<%= room %>');
+                    var message = document.getElementById("messageInput").value;
+                    socket.emit("newMessage", {from: from, to: to, message: message})
+                    document.getElementById("messageInput").value = "";
+                    document.getElementById("chatbox").innerHTML += 
+                    '<div style="width: 100%; float:left; height: fit-content; border: none;">'+
+                        '<div style="width: 60%; float: right; text-align:right; display: block; height: fit-content; border: none;">'+
+                            '<p style="width: fit-content; float: right; word-break: break-all; text-align:left; height: fit-content; padding: 5px 5px; margin: 2px 10px; border: none; background-color:BlueViolet ; border-radius: 10px">'+
+                                '<a style="color: white">'+message+'</a><br>'+
+                                '<a style="font-size: 8px; margin:0; padding:0; float:right; color: white">'+curr_time+'</a>'+
+                            '</p>'+
+                        '</div>'+
+                    '</div>'
+                    message = "";
+                    document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+                }
+            }
+
+            let pre_email = "";
+            let all_colors = ["AliceBlue", "#b2fbc5", "#ccdefa", "#fce9cf", "#d4cffc"];
+            let ind = 0;
+
+            socket.on("gotnewMessage", (data) => {
+                if(data.to === parseInt('<%= room %>')){
+                    var time = new Date();
+                    var mm = time.getMinutes();
+                    var curr_time = time.getHours()+":";
+                    if(mm < 10){
+                        mm = "0"+mm.toString();
+                    }
+                    curr_time += mm.toString();
+                    var message = data.message;
+                    if(pre_email !== data.from){
+                        pre_email = data.from;
+                        if(ind === 5){
+                            ind = 0;
+                            color = all_colors[ind];
+                        }else{
+                            color = all_colors[ind];
+                            ind += 1;
+                        }
+                        document.getElementById("chatbox").innerHTML += 
+                        '<div style="width: 100%; height: fit-content; float:left">'+
+                            '<div style="width: 60%; float: left; text-align:left; display: block; padding-top:5px; height: fit-content">'+
+                                '<p style="width: fit-content; word-break: break-all; float: left; margin-top:20px; height: fit-content; padding: 5px 5px; margin: 2px 10px; background-color: '+color+'; color:black; border-radius: 10px">'+
+                                    '<a style="font-size: 10px">'+data.from+'</a><br>'+
+                                    '<a>'+message+'</a><br>'+
+                                    '<a style="font-size: 8px; margin:0; padding:0; float:right">'+curr_time+'</a>'+
+                                '</p>'+
+                            '</div>'+
+                        '</div>'
+                    }else{
+                        document.getElementById("chatbox").innerHTML += 
+                    '<div style="width: 100%; height: fit-content; float:left; border: none;">'+
+                        '<div style="width: 60%; float: left; text-align:left; display: block; height: fit-content; border: none;">'+
+                            '<p style="width: fit-content; float: left; word-break: break-all; height: fit-content; padding: 5px 5px; margin: 2px 10px; border: none; background-color: '+color+'; color:black; border-radius: 10px">'+
+                                '<a>'+message+'</a><br>'+
+                                '<a style="font-size: 8px; margin:0; padding:0; float:right">'+curr_time+'</a>'+
+                            '</p>'+
+                        '</div>'+
+                    '</div>'
+                    }
+                    document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+                }
+            })
+
+            const deleteroom = () => {
+                console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+                socket.emit('deleteroom', {room: "<%= room %>"})
+            }
+
+            socket.on("delete", (data) => {
+                if("<%= room %>" === data.room.toString()){
+                    document.getElementById("users").innerHTML = "";
+                    document.getElementById("chatbox").innerHTML = '<h1>Room Deleted by Owner!!!</h1><a href="/' + '<%= email %>' + '">Go back</a>'
+                    document.getElementById("functions").innerHTML = "";
+                }
+            })
+            
+        </script>
+    </head>
+
+    <body style="text-align: center;" onload="runf()">
+
+        <div style="width: 20%; height: 500px; float:left" class="users" id="users"></div>
+        <div style="width: 60%; height: 500px; float:left; ">
+            <div style="height: 470px; width: 99%; border: 2px solid grey; background-color:rgb(204, 228, 204); overflow-y:scroll; overflow-x:hidden" id="chatbox"></div>
+            <div style="width: 100%; height: 50px">
+                <input type="text" style="width: 77%; float:left; height: 23px" name="messageInput" id="messageInput" placeholder="Message"/>
+                <button style="float:left; width: 17%; height: 30px; border: 2px solid black" onclick="sendmessage()">Send</button>
+            </div>
+        </div>
+        <div style="width: 20%; height: 500px; float:left" class="functions" id="functions"></div>
+        
+    </body>
+</html>

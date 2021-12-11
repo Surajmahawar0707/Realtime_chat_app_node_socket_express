@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <style>
+
+        body{
+            width: auto;
+            margin: auto;
+            align-items: center;
+            justify-content: center;
+        }
+
+        ul{
+            height: 50px;
+            width: 90%;
+            position: inherit;
+        }
+
+        li{
+            height: fit-content;
+            width: fit-content;
+            display: block;
+            float: left;
+        }
+
+        li a{
+            padding: 15px 20px;
+            margin: 15px 20px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .card {
+            margin: 10px auto;
+            border: none;
+        }
+        
+        .box {
+            width: 40%;
+            left: 30%;
+            position: absolute;
+            background: #191919;
+            text-align: center;
+            transition: 0.25s;
+        }
+        
+        .box input[type="email"],
+        .box input[type="password"] {
+            border: 0;
+            background: none;
+            display: block;
+            margin: 20px auto;
+            text-align: center;
+            border: 2px solid #3498db;
+            padding: 10px 10px;
+            width: 40%;
+            outline: none;
+            color: white;
+            border-radius: 24px;
+            transition: 0.25s
+        }
+        
+        .box input[type="text"] {
+            border: 0;
+            background: none;
+            display: block;
+            float:left;
+            margin-top: 20px;
+            margin-bottom:20px;
+            text-align: center;
+            border: 2px solid #3498db;
+            padding: 10px 10px;
+            width: 25%;
+            outline: none;
+            color: white;
+            border-radius: 24px;
+            transition: 0.25s
+        }
+        
+        .box h1 {
+            color: white;
+            text-transform: uppercase;
+            font-weight: 500
+        }
+        
+        .box input[type="email"]:focus,
+        .box input[type="password"]:focus
+        .box input[type="text"]:focus {
+            width: 50%;
+            border-color: #2ecc71
+        }
+        
+        .box button[type="submit"] {
+            border: 0;
+            background: none;
+            display: block;
+            margin: 20px auto;
+            text-align: center;
+            border: 2px solid #2ecc71;
+            padding: 14px 80px;
+            outline: none;
+            color: white;
+            border-radius: 24px;
+            transition: 0.25s;
+            cursor: pointer
+        }
+        
+        .box button[type="submit"]:hover {
+            background: #2ecc71
+        }
+        
+
+        li a:hover{
+            border-bottom: 2px solid grey;
+            font-size: 120%;
+        }
+
+    </style>
+    <head>
+        <title>index page</title>
+    </head>
+    <body>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/signup" style="font-size: 120%; border-bottom: 2px solid grey">Signup</a></li>
+            <li><a href="/login">Login</a></li>
+        </ul>
+        <div class="container" style="width: 100%; align-items: center; justify-content: center">
+            <div class="card">
+                <form class="box" action="/signup" method="post">
+                    <h1>User Registration From</h1>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="p1" placeholder="Password" required>
+                    <input type="password" name="p2" placeholder="Repeat Password" required> 
+                    <div style="width: fit-content; height:fit-content; color: white; background-color:red; margin:0 auto"><%= message %></div>
+                    <button type="submit">Register</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
